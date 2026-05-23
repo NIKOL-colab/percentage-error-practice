@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Percentage Error Practice</title>
+  <meta name="description"
+        content="Practice percentage error calculations interactively — log differentiation, step-by-step hints, and instant feedback." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>∂</text></svg>" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<div id="app">
+
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+
+  <div class="app-wrapper">
+
+    <header class="app-header">
+      <div class="logo">
+        <img src="/static/pccoe-logo-new.webp" alt="PCCOE Logo" class="logo-img" />
+        <span class="logo-text">Percentage Error Practice</span>
+      </div>
+      <button id="btn-restart" class="btn-ghost" onclick="restartApp()" style="display:none">
+        ↺ Restart
+      </button>
+    </header>
+
+    <div class="progress-container" id="progress-container">
+      <div class="progress-steps">
+
+        <div class="progress-step active" id="pstep-1">
+          <div class="step-circle">1</div>
+          <span class="step-label">Equation</span>
+        </div>
+
+        <div class="progress-line" id="pline-1"></div>
+
+        <div class="progress-step" id="pstep-2">
+          <div class="step-circle">2</div>
+          <span class="step-label">Derivative</span>
+        </div>
+
+        <div class="progress-line" id="pline-2"></div>
+
+        <div class="progress-step" id="pstep-3">
+          <div class="step-circle">3</div>
+          <span class="step-label">% Errors</span>
+        </div>
+
+        <div class="progress-line" id="pline-3"></div>
+
+        <div class="progress-step" id="pstep-4">
+          <div class="step-circle">4</div>
+          <span class="step-label">Answer</span>
+        </div>
+
+      </div>
+    </div>
+
+    <main class="main-content">
+
+      <section id="screen-equation" class="screen active">
+
+        <div class="card">
+          <span class="card-icon">∑</span>
+          <h1 class="card-title">Percentage Error Practice</h1>
+          <p class="card-subtitle">
+            Enter a multiplicative equation (e.g. <code style="font-family:monospace;color:#a78bfa">V = l*b*h</code>).
+          </p>
+
+          <div class="input-group">
+            <label class="input-label" for="eq-input">Mathematical Equation</label>
+            <div class="input-hint">
+              Use <code>*</code> for multiplication &nbsp;·&nbsp;
+              <code>^</code> or <code>**</code> for powers &nbsp;·&nbsp;
+              <code>/</code> for division
+            </div>
+            <input
+              id="eq-input"
+              type="text"
+              class="text-input"
+              placeholder="e.g.  V = l*b*h"
+              autocomplete="off"
+              spellcheck="false"
+              onkeydown="if(event.key==='Enter') parseEquation()"
+            />
+            <div id="eq-error" class="error-msg hidden"></div>
+          </div>
+
+          <button id="btn-parse" class="btn-primary" onclick="parseEquation()">
+            <span>Analyse Equation</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+        <div class="examples-section">
+          <p class="examples-label">Quick Examples</p>
+          <div class="examples-row">
+            <button class="example-chip" onclick="setExample('V = l*b*h')">V = lbh</button>
+            <button class="example-chip" onclick="setExample('P = i^2 * R')">P = i²R</button>
+            <button class="example-chip" onclick="setExample('E = m*c^2')">E = mc²</button>
+            <button class="example-chip" onclick="setExample('F = m*v^2/r')">F = mv²/r</button>
+            <button class="example-chip" onclick="setExample('T = 2*pi*sqrt(l/g)')">T = 2π√(l/g)</button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="screen-derivative" class="screen">
+
+        <div class="card">
+          <span class="card-icon">∂</span>
+          <h2 class="card-title">Derivative</h2>
+          <p class="card-subtitle">
+            Using <strong>log differentiation</strong>, find the fractional error formula
+            and type the <strong>right-hand side</strong> in the box below.<br>
+            <span style="font-family:monospace;font-size:13px;color:var(--purple-light)">e.g. &nbsp;db/b + dh/h + dl/l &nbsp;or&nbsp; 2*di/i + dR/R</span>
+          </p>
+
+          <div class="formula-display" id="formula-template">
+
+          </div>
+
+          <div class="inputs-container" id="deriv-inputs">
+
+          </div>
+
+          <div id="deriv-error" class="error-msg hidden"></div>
+
+          <div class="btn-row">
+            <button class="btn-primary" onclick="checkDerivative()">
+              <span>Check</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="screen-deriv-hints" class="screen">
+
+        <div class="card card-hints">
+          <span class="card-icon">💡</span>
+          <h2 class="card-title">Log Differentiation — Step by Step</h2>
+          <p class="card-subtitle">
+            Each click reveals the next step of the derivation. Work through them, then go back to the quiz.
+          </p>
+
+          <div class="hints-log" id="deriv-hints-log"></div>
+
+          <div class="btn-row">
+            <button id="btn-next-deriv-hint" class="btn-primary" onclick="nextDerivHint()">
+              Next Step →
+            </button>
+            <button id="btn-back-to-deriv" class="btn-success hidden" onclick="goToScreen('screen-derivative')">
+              ✓ Back to Quiz
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="screen-errors" class="screen">
+
+        <div class="card">
+          <span class="card-icon">%</span>
+          <h2 class="card-title">Enter Percentage Errors</h2>
+          <p class="card-subtitle">
+            Enter the given percentage error for each variable. The program will
+            use these to compute the total percentage error.
+          </p>
+
+          <div class="inputs-container" id="error-inputs">
+
+          </div>
+
+          <div id="errors-error" class="error-msg hidden"></div>
+
+          <button class="btn-primary" onclick="submitErrors()">
+            <span>Calculate &amp; Continue</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+      </section>
+
+      <section id="screen-answer" class="screen">
+
+        <div class="card">
+          <span class="card-icon">🎯</span>
+          <h2 class="card-title">What is the Total % Error?</h2>
+          <p class="card-subtitle" id="answer-subtitle">
+            Using the percentage errors you provided, calculate the total
+            percentage error and enter your answer below.
+          </p>
+
+          <div class="input-group">
+            <label class="input-label" for="answer-input">Total Percentage Error (%)</label>
+            <input
+              id="answer-input"
+              type="number"
+              step="any"
+              class="text-input"
+              placeholder="Enter your calculated answer"
+              onkeydown="if(event.key==='Enter') checkAnswer()"
+            />
+            <div id="answer-error" class="error-msg hidden"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn-secondary" onclick="loadAndShowCalcHints()">
+              💡 Show Steps
+            </button>
+            <button class="btn-primary" onclick="checkAnswer()">
+              <span>Check Answer</span>
+              <span class="btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="screen-calc-hints" class="screen">
+
+        <div class="card card-hints">
+          <span class="card-icon">📋</span>
+          <h2 class="card-title">Step-by-Step Solution</h2>
+          <p class="card-subtitle">
+            Follow each step to work out the total percentage error.
+          </p>
+
+          <div class="hints-log" id="calc-hints-log"></div>
+
+          <div class="btn-row">
+            <button id="btn-next-calc-hint" class="btn-primary" onclick="nextCalcHint()">
+              Next Step →
+            </button>
+            <button id="btn-back-to-answer" class="btn-success hidden" onclick="goToScreen('screen-answer')">
+              ✓ Enter My Answer
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <section id="screen-success" class="screen">
+
+        <div class="card card-success">
+          <div class="success-animation">
+            <div class="checkmark-circle">
+              <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+                <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+              </svg>
+            </div>
+          </div>
+
+          <h2 class="card-title success-title">Excellent! 🎉</h2>
+          <p class="card-subtitle">Your answer is correct — well done!</p>
+
+          <div class="correct-answer-display" id="success-answer-display">
+
+          </div>
+
+          <button class="btn-primary" onclick="restartApp()">
+            <span>Try Another Problem</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+
+      </section>
+
+      <section id="screen-wrong" class="screen">
+
+        <div class="card card-wrong">
+          <div class="wrong-icon">✗</div>
+          <h2 class="card-title wrong-title" id="wrong-title">Incorrect</h2>
+          <p class="card-subtitle" id="wrong-subtitle">
+            Don't give up! What would you like to do?
+          </p>
+
+          <div class="choice-buttons">
+            <button class="btn-primary" id="btn-try-again" onclick="handleTryAgain()">
+              🔄 Try Again
+            </button>
+            <button class="btn-secondary" id="btn-show-steps" onclick="handleShowSteps()">
+              💡 Show Step-by-Step
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>
+        <a href="https://github.com" id="github-link" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+      </p>
+    </footer>
+
+  </div>
+</div>
+
+<script src="/static/js/app.js"></script>
+</body>
+</html>
