@@ -11,7 +11,6 @@ differentiation. Built with **Flask** (backend) + **Vanilla JS** (frontend).
 - Enter **percentage errors** for each variable
 - **Answer Quiz** — calculate total % error and check it
 - Step-by-step **calculation hints** if the answer is wrong
-- Fully deployable to the web (Render, Railway, etc.)
 
 ---
 
